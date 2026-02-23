@@ -1,0 +1,5 @@
+{
+  "name": "台股ETF排行",
+  "description": "A dashboard for Taiwan Stock ETF rankings and information, featuring real-time data, categorization, and sorting.",
+  "requestFramePermissions": []
+}
