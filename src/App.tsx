@@ -282,16 +282,8 @@ export default function App() {
 
   // 單純同步供「分享按鈕」使用的分享網址
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const href = window.location.href.split('?')[0];
-      const isLocal = window.location.protocol === 'file:' || window.location.origin === 'null' || href.includes('blob:');
-      
-      if (isLocal) {
-        setShareUrl("⚠️ 請部署網頁至伺服器以產生分享連結");
-      } else {
-        setShareUrl(`${href}?category=${activeCategory}`);
-      }
-    }
+    const baseUrl = "https://elegant-blancmange-329c44.netlify.app/";
+    setShareUrl(`${baseUrl}?category=${activeCategory}`);
   }, [activeCategory]);
 
   // 點擊標籤時的切換處理 (更新畫面與網址列，但不重新整理網頁)
