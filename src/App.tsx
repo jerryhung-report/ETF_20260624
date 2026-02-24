@@ -70,7 +70,7 @@ function useETFData() {
       };
       
       const twseUrl = 'https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL';
-      const tpexUrl = 'https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes';
+      const tpexUrl = 'https://www.tpex.org.tw/openapi/v1/tpex_mainboard_quotes';
 
       // 同步等待兩個市場的 API 回應
       const [twse, tpex] = await Promise.all([
@@ -166,7 +166,7 @@ const ETFCard = ({ etf, index, isRanking, activeCategory, showVolume }: any) => 
       )}
       <div className="mb-4">
         <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-          <a href="https://www.pocket.tw/" target="_blank" rel="noopener noreferrer" className="text-xl font-black text-gray-900 hover:text-blue-600 hover:underline truncate max-w-[200px] transition-colors">
+          <a href={`https://www.pocket.tw/etf/tw/${etf.id}`} target="_blank" rel="noopener noreferrer" className="text-xl font-black text-gray-900 hover:text-blue-600 hover:underline truncate max-w-[200px] transition-colors">
             {etf.name}
           </a>
           <div className="flex gap-1">
@@ -182,7 +182,7 @@ const ETFCard = ({ etf, index, isRanking, activeCategory, showVolume }: any) => 
       </div>
       <div className="flex items-end justify-between">
         <div>
-          <span className="text-[10px] text-gray-400 font-bold mb-0.5 uppercase tracking-tighter block">市價</span>
+          <span className="text-[10px] text-gray-400 font-bold mb-0.5 uppercase tracking-tighter block">收盤價</span>
           <div className={`font-black text-2xl ${color}`}>{etf.price.toFixed(2)}</div>
         </div>
         <div className="flex flex-col items-end gap-1.5">
@@ -207,7 +207,7 @@ const RaisingCard = ({ etf }: any) => (
     <div className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-bl-xl shadow-md z-10">申購中</div>
     <div className="p-5 flex-1">
       <div className="mb-4">
-        <a href={etf.prospectusUrl || "https://mops.twse.com.tw/mops/web/t146sb05"} target="_blank" rel="noopener noreferrer" className="text-xl font-black text-gray-900 hover:text-blue-600 hover:underline transition-colors block mb-1 truncate max-w-[220px]">
+        <a href={`https://www.pocket.tw/etf/tw/${etf.id}`} target="_blank" rel="noopener noreferrer" className="text-xl font-black text-gray-900 hover:text-blue-600 hover:underline transition-colors block mb-1 truncate max-w-[220px]">
           {etf.name}
         </a>
         <span className="text-sm font-bold text-gray-400">{etf.id}</span>
@@ -241,9 +241,9 @@ export default function App() {
   const [activeCategory, setActiveCategory] = useState(() => {
     try {
       const p = new URLSearchParams(window.location.search).get('category');
-      return CATEGORIES.some(c => c.id === p) ? p : 'volume';
+      return CATEGORIES.some(c => c.id === p) ? p : 'all';
     } catch(e) {
-      return 'volume';
+      return 'all';
     }
   });
 
@@ -257,7 +257,7 @@ export default function App() {
     const handlePopState = () => {
       try {
         const p = new URLSearchParams(window.location.search).get('category');
-        if (p) setActiveCategory(CATEGORIES.some(c => c.id === p) ? p : 'volume');
+        if (p) setActiveCategory(CATEGORIES.some(c => c.id === p) ? p : 'all');
       } catch (e) {
         // Ignore errors in environments that restrict URLSearchParams
       }
@@ -442,7 +442,7 @@ export default function App() {
         <div className="max-w-[1440px] mx-auto text-center space-y-4">
           <span className="font-black text-gray-700 text-xs tracking-widest uppercase bg-gray-100 px-4 py-1.5 rounded-full">免責聲明</span>
           <div className="text-xs sm:text-sm text-gray-400 font-bold leading-relaxed space-y-1.5">
-            <p>資料來源：台灣證券交易所、證券櫃檯買賣中心（延遲報價）</p>
+            <p>資料來源：台灣證券交易所、證券櫃檯買賣中心</p>
             <p>投資人交易時以證券商交易平台報價為主，本公司網站或APP僅供參考。</p>
           </div>
         </div>
