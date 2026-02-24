@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { Search, Globe, Flame, Users, Landmark, Zap, Sparkles, Rocket, TrendingUp, TrendingDown, ArrowUpRight, RefreshCw, Share2, Copy, CheckCircle, X, Filter } from 'lucide-react';
+import { Search, Globe, Flame, Users, Landmark, Zap, Sparkles, Rocket, TrendingUp, TrendingDown, ArrowUpRight, RefreshCw, Share2, Copy, CheckCircle, X, Filter, Coins } from 'lucide-react';
 
 /* ==========================================================================
  * [1] 常數與靜態設定
@@ -19,6 +19,7 @@ const RANKING_DATA = {
 
 const CATEGORIES = [
   { id: 'all', label: '全部ETF', icon: Globe },
+  { id: 'dividend', label: '配息型', icon: Coins },
   { id: 'volume', label: '高買氣', icon: Flame },
   { id: 'beneficiaries', label: '受益人', icon: Users },
   { id: 'aum', label: '資產規模', icon: Landmark },
@@ -108,11 +109,40 @@ function useETFData() {
         else if (item.name.includes('反1')) cat = '反向型';
         else if (item.name.includes('高息') || item.name.includes('優息')) cat = '高股息';
 
+        // 配息頻率判斷邏輯
+        let freq = '';
+        const name = item.name;
+        const id = item.id;
+        
+        // 優先檢查名稱中是否包含關鍵字
+        if (name.includes('月配')) freq = '月配';
+        else if (name.includes('雙月配')) freq = '雙月配';
+        else if (name.includes('季配')) freq = '季配';
+        else if (name.includes('半年配')) freq = '半年配';
+        else if (name.includes('年配')) freq = '年配';
+        else if (name.includes('不配')) freq = '不配息';
+        
+        // 針對熱門 ETF 的硬編碼對應 (若名稱未標示)
+        if (!freq) {
+            const freqMap: Record<string, string> = {
+                '0050': '半年配', '0056': '季配', '00878': '季配', '00929': '月配', '00919': '季配',
+                '00940': '月配', '006208': '半年配', '00713': '季配', '00939': '月配', '00944': '月配',
+                '00934': '月配', '00936': '月配', '00946': '月配', '00943': '月配', '0052': '年配',
+                '00692': '半年配', '00881': '半年配', '00900': '季配', '00915': '季配', '00918': '季配',
+                '00927': '季配', '00922': '半年配', '00923': '半年配', '00850': '季配', '00891': '季配',
+                '00892': '半年配', '00907': '雙月配', '00679B': '季配', '00687B': '季配', '00937B': '月配',
+                '00933B': '月配', '00720B': '季配', '00725B': '季配', '00751B': '季配', '00772B': '月配',
+                '00773B': '月配', '00632R': '不配息', '00631L': '不配息'
+            };
+            if (freqMap[id]) freq = freqMap[id];
+        }
+
         return { 
           id: item.id, 
           name: item.name, 
           category: cat, 
           market: item.market,
+          frequency: freq,
           price, 
           change: changeVal, 
           changePercent: percent, 
@@ -176,6 +206,11 @@ const ETFCard = ({ etf, index, isRanking, activeCategory, showVolume }: any) => 
             <span className="text-[10px] px-1.5 py-0.5 bg-blue-50 text-blue-600 font-bold rounded border border-blue-100 whitespace-nowrap">
               {etf.category}
             </span>
+            {etf.frequency && (
+              <span className="text-[10px] px-1.5 py-0.5 bg-purple-50 text-purple-600 font-bold rounded border border-purple-100 whitespace-nowrap">
+                {etf.frequency}
+              </span>
+            )}
           </div>
         </div>
         <span className="text-sm font-bold text-gray-400 tracking-tight">{etf.id}</span>
@@ -309,6 +344,9 @@ export default function App() {
       list = RANKING_DATA.new_raising.slice(0, 10);
     } else if (activeCategory === 'all') {
       list = [...etfData]; // 複製陣列以便後續排序
+    } else if (activeCategory === 'dividend') {
+      const dividendTypes = ['月配', '雙月配', '季配', '半年配', '年配'];
+      list = etfData.filter(e => dividendTypes.includes(e.frequency));
     } else if (activeCategory === 'volume') {
       list = [...etfData].sort((a, b) => b.volume - a.volume).slice(0, 10);
     } else {
@@ -321,8 +359,8 @@ export default function App() {
       list = list.filter(e => e.id.includes(low) || e.name.toLowerCase().includes(low));
     }
 
-    // 針對「全部ETF」套用排序功能
-    if (activeCategory === 'all') {
+    // 針對「全部ETF」或「配息型」套用排序功能
+    if (activeCategory === 'all' || activeCategory === 'dividend') {
       if (sortOption === 'gainers') {
         list.sort((a, b) => b.changePercent - a.changePercent);
       } else if (sortOption === 'losers') {
@@ -383,8 +421,8 @@ export default function App() {
           })}
         </div>
 
-        {/* 排序功能區 (僅在「全部ETF」顯示) */}
-        {activeCategory === 'all' && (
+        {/* 排序功能區 (僅在「全部ETF」或「配息型」顯示) */}
+        {(activeCategory === 'all' || activeCategory === 'dividend') && (
           <div className="flex items-center gap-2 mb-8 overflow-x-auto scrollbar-hide pb-2">
             <span className="text-xs font-bold text-gray-500 whitespace-nowrap flex items-center gap-1 mr-1">
               <Filter size={14} /> 排序方式
